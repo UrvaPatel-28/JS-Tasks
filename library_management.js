@@ -4,7 +4,9 @@ function createBook(title, author, isbn) {
         title: title,
         author: author,
         isbn: isbn,
-        checkedOut: false
+        checkedOut: false,
+        checkoutCount: 0,
+        rating: []
     };
 }
 //calling function createBook
@@ -19,7 +21,6 @@ const book6 = createBook("Amongus", "John", 234567891);
 
 // create an array to store the library books
 const library = [];
-
 
 //-----------------------------------------------------------------------------------
 
@@ -45,34 +46,47 @@ addBookToLibrary(book6);
 //library all   books 
 console.table(library);
 
+
 //-----------------------------------------------------------------------------------
 
+//common function of find book in linrary by isbn number
+function findBookByISBN(isbn) {
+    return library.find(book => book.isbn === isbn);
+}
+
+//--------------------------------------------------------------------------------------------------
+
 //3. checkout Book
+const MAX_CHECKOUTS = 3;
 function checkoutBook(isbn) {
-    const book = library.find((book) => {
-        return book.isbn === isbn
-    });
+    const book = findBookByISBN(isbn);
     if (book) {
-        book.checkedOut = true;
-        console.log(`Book with ISBN ${isbn} has been checked out.`);
+        if (book.checkoutCount < MAX_CHECKOUTS) {
+            book.checkedOut = true;
+            book.checkoutCount++;
+            console.log(`Book with ISBN ${isbn} has been checked out. ${book.checkoutCount} times.`);
+        }
+        else {
+            console.log(`Book "${book.isbn}" cannot be checked out. Maximum checkout limit reached.`);
+        }
+
     } else {
         console.error(`Book with ISBN ${isbn} was not found.`);
     }
 }
 //calling function checkoutBook
 checkoutBook(123456789);
+checkoutBook(123456789);
 checkoutBook(987654321);
-checkoutBook(4567891);
-//library all   books
+checkoutBook(4567891); // book not found
+
 console.table(library);
 
 //----------------------------------------------------------------------------------------------
 
 //4. Return Book
 function returnBook(isbn) {
-    const book = library.find((book) => {
-        return book.isbn === isbn
-    });
+    const book = findBookByISBN(isbn);
 
     if (book) {
         book.checkedOut = false;
@@ -89,20 +103,26 @@ console.table(library);
 
 //----------------------------------------------------------------------------------------
 
-//5.find book by author
-function findBooksByAuthor(author) {
-    const booksofauthor = library.filter((book) => {
-        return book.author === author //jo {} na hoy to return na lkho to chale, pan jo {} hoy to return lkjvuj pd
+//5.search books by author or title
+function searchbook(query) {
+    const lowerquery = query.toLowerCase();
+
+    const matchingBook = library.filter((book) => {
+        const title = book.title.toLowerCase();
+        const author = book.author.toLowerCase();
+        return title.includes(lowerquery) || author.includes(lowerquery);
     });
-    if (booksofauthor.length >= 1) {
-        console.table(booksofauthor);
+
+    if (matchingBook.length >= 1) {
+        return matchingBook;
     } else {
-        console.error(`Author not found.`);
+        console.error(`Book not found.`);
     }
 
 }
-//calling function findBooksByAuthor
-findBooksByAuthor("Harper Lee");
+searchbook('Har');
+searchbook('world');
+
 
 //----------------------------------------------------------------------------------------------
 
@@ -132,9 +152,52 @@ function displayCheckedOutBooks() {
 }
 displayCheckedOutBooks();
 
-//----------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------
+
+//8.Rate Books Function
+function rateBook(isbn, rating) {
+    const book = findBookByISBN(isbn);;
+    if (book) {
+        if (rating >= 1 && rating <= 5) {
+            book.rating.push(rating);
+            console.log(`Book "${book.title}" has been rated ${rating} stars.`);
+        } else {
+            console.log("Invalid rating. Please provide a rating between 1 and 5.");
+        }
+    } else {
+        console.log(`Book with ISBN "${isbn}" not found in the library.`);
+    }
+}
+rateBook(123456789, 5);
+rateBook(123456789, 3);
+rateBook(123456789, 7);
+
+rateBook(987654321, 1);
 
 //library all   books
 console.table(library);
+
+//--------------------------------------------------------------------------------------------
+
+//9.function for calculate average of book
+function averagerate(isbn) {
+    const book = findBookByISBN(isbn);;
+    if (book.rating.length > 0) {
+        let totalRating = book.rating.reduce((sum, current) => {
+            return sum += current;
+        })
+        let averageRating = totalRating / book.rating.length;
+        console.log(`Average rating of "${book.title}"is ${averageRating.toFixed(1)}`);
+    } else {
+        console.log(`No ratings for "${book.title}"`);
+    }
+}
+averagerate(123456789);
+//library all   books
+console.table(library);
+
+
+
 
 
