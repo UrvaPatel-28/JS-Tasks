@@ -6,6 +6,7 @@ function createBook(title, author, isbn) {
         isbn: isbn,
         checkedOut: false,
         checkoutCount: 0,
+        dueDate: null,
         rating: []
     };
 }
@@ -61,9 +62,18 @@ const MAX_CHECKOUTS = 3;
 function checkoutBook(isbn) {
     const book = findBookByISBN(isbn);
     if (book) {
+        //check max checkouts
         if (book.checkoutCount < MAX_CHECKOUTS) {
             book.checkedOut = true;
             book.checkoutCount++;
+
+
+            //add due date to the book
+            const dueDate = new Date();
+            dueDate.setDate(2); //set date 2 sptember
+            // dueDate.setDate(dueDate.getDate() + 10) // for set due date to 10 days from now
+            book.dueDate = dueDate;
+
             console.log(`Book with ISBN ${isbn} has been checked out. ${book.checkoutCount} times.`);
         }
         else {
@@ -196,6 +206,18 @@ function averagerate(isbn) {
 averagerate(123456789);
 //library all   books
 console.table(library);
+
+//--------------------------------------------------------------------------------------------
+
+//9.function for list over due date books
+function listOverdueBooks() {
+    const currentDate = new Date();
+    const overdueBooks = library.filter((book) => {
+        return book.checkedOut && book.dueDate && book.dueDate < currentDate;
+    });
+    console.table(overdueBooks);
+}
+listOverdueBooks();
 
 
 
