@@ -7,15 +7,16 @@ function createBook(title, author, isbn) {
         checkedOut: false,
         checkoutCount: 0,
         dueDate: null,
-        rating: []
+        rating: [],
+        averageraing: []
     };
 }
 //calling function createBook
 const book1 = createBook("To Kill a Mockingbird", "Harper Lee", 123456789);
 const book2 = createBook("1984", "George Orwell", 987654321);
 const book3 = createBook("Brave New World", "Aldous Huxley", 456789123);
-const book4 = createBook(" World War", "Nick", 234567891);
-const book5 = createBook(" Taitanic", "Deo", 891685478);
+const book4 = createBook("World War", "Nick", 234567891);
+const book5 = createBook("Taitanic", "Deo", 891685478);
 const book6 = createBook("Amongus", "John", 234567891);
 
 //-----------------------------------------------------------------------------------
@@ -179,37 +180,40 @@ function rateBook(isbn, rating) {
         console.log(`Book with ISBN "${isbn}" not found in the library.`);
     }
 }
-rateBook(123456789, 5);
-rateBook(123456789, 3);
-rateBook(123456789, 7);
+rateBook(123456789, 5);//[5]
+rateBook(123456789, 2);//[5,2]
+rateBook(123456789, 7);//invalid rating
 
-rateBook(987654321, 1);
+rateBook(987654321, 1);//[1]
 
 //library all   books
 console.table(library);
 
 //--------------------------------------------------------------------------------------------
+//9.Calculate Average rate of book 
+function averagerate() {
+    library.map((book) => {
+        if (book.rating.length > 0) {
+            let totalRating = book.rating.reduce((sum, current) => {
+                return sum += current;
+            })
+            let averageRating = totalRating / book.rating.length;
+            console.log(`Average rating of "${book.title}"is ${averageRating.toFixed(1)}`);
+            book.averageraing = Number(averageRating.toFixed(1));
+        } else {
+            book.averageraing = 0
+        }
+    })
 
-//9.function for calculate average of book
-function averagerate(isbn) {
-    const book = findBookByISBN(isbn);;
-    if (book.rating.length > 0) {
-        let totalRating = book.rating.reduce((sum, current) => {
-            return sum += current;
-        })
-        let averageRating = totalRating / book.rating.length;
-        console.log(`Average rating of "${book.title}"is ${averageRating.toFixed(1)}`);
-    } else {
-        console.log(`No ratings for "${book.title}"`);
-    }
 }
-averagerate(123456789);
-//library all   books
+averagerate();
 console.table(library);
+
+
 
 //--------------------------------------------------------------------------------------------
 
-//9.function for list over due date books
+//10.function for list over due date books
 function listOverdueBooks() {
     const currentDate = new Date();
     const overdueBooks = library.filter((book) => {
@@ -218,6 +222,61 @@ function listOverdueBooks() {
     console.table(overdueBooks);
 }
 listOverdueBooks();
+
+//--------------------------------------------------------------------------------------------
+
+//11.function for save library items list in local storage
+function saveLibrary() {
+    try {
+        localStorage.setItem("library", JSON.stringify(library));
+        console.log("Library data saved to localStorage.");
+    } catch (error) {
+        console.error("Error saving library data to localStorage:", error);
+    }
+}
+saveLibrary();
+
+//--------------------------------------------------------------------------------------------
+
+//12.function for load library from local storage
+function loadLibrary() {
+    try {
+        const storedLibrary = localStorage.getItem("library");
+        const parsedLibrary = JSON.parse(storedLibrary);
+        library.length = 0; //clear books from library
+        library.push(...parsedLibrary);
+    } catch (error) {
+        console.error("Error loading library data from localStorage:", error);
+    }
+}
+loadLibrary();
+
+//--------------------------------------------------------------------------------------------
+
+//13.sort the library based on the provided criteria
+
+function sortLibrary(criteria) {
+
+    const sortbook = {
+        title: (a, b) => a.title.localeCompare(b.title),
+        author: (a, b) => a.author.localeCompare(b.author),
+        averageRating: (a, b) => averagerate(b) - averagerate(a),
+        checkoutCount: (a, b) => a.checkoutCount - b.checkoutCount,
+        averagerating: (a, b) => b.averageraing - a.averageraing
+    };
+
+
+    if (sortbook[criteria]) {
+        library.sort(sortbook[criteria]);
+        console.log(`Library sorted by ${criteria}.`);
+    } else {
+        console.log("Invalid sorting criteria.");
+    }
+}
+
+sortLibrary('averagerating') //sort by average rating og book
+
+console.table(library);
 
 
 
